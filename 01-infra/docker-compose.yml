@@ -16,7 +16,7 @@ services:
     volumes:
       - ${DATA_DIR:-.}/postgres_data_${DEPLOY_ENV:-dev}:/var/lib/postgresql/data
     ports:
-      - '127.0.0.1:${POSTGRES_PORT:-5432}:5432'
+      - '${POSTGRES_PORT:-55432}:5432'
     networks:
       dokploy-network:
         aliases:
@@ -37,8 +37,8 @@ services:
     volumes:
       - ${DATA_DIR:-.}/minio_data_${DEPLOY_ENV:-dev}:/data
     ports:
-      - '127.0.0.1:${MINIO_PORT:-55900}:9000'
-      - '127.0.0.1:${MINIO_UI_PORT:-55751}:9001'
+      - '${MINIO_PORT:-55900}:9000'
+      - '${MINIO_UI_PORT:-55751}:9001'
     command: server /data --address ":9000" --console-address ":9001"
     networks:
       dokploy-network:

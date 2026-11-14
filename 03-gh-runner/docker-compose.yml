@@ -23,9 +23,9 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${RUNNER_DATA_ROOT:-/home/travis/11-github-runner}:/home/runner/persist
-    # Host docker.sock group (docker.sock often root:docker). Override DOCKER_GID if needed.
-    group_add:
-      - "${DOCKER_GID:-999}"
+    # Swarm stack schema rejects group_add. Match host docker.sock GID as primary group
+    # so the runner can use the socket (stat -c '%g' /var/run/docker.sock on the node).
+    user: "${RUNNER_UID:-1001}:${DOCKER_GID:-999}"
     networks:
       - dokploy-network
     deploy:

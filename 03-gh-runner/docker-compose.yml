@@ -1,26 +1,31 @@
-# Dokploy Swarm stack (composeType: stack)
-# Avoid: Swarm configs, {{.Task.Slot}} bind paths, custom entrypoint —
-# those leave tasks stuck in Preparing on Dokploy.
+# Dokploy Swarm stack — official GitHub Actions runner image
+# Image: https://github.com/actions/runner/pkgs/container/actions-runner
 services:
   runner:
-    image: ${RUNNER_IMAGE:-myoung34/github-runner:latest}
+    image: ${RUNNER_IMAGE:-ghcr.io/actions/actions-runner:latest}
+    entrypoint: ["/bin/bash", "/custom-entrypoint.sh"]
+    configs:
+      - source: runner_entrypoint
+        target: /custom-entrypoint.sh
+        mode: 0755
     environment:
-      REPO_URL: ${REPO_URL:-https://github.com/wmastudio}
-      RUNNER_SCOPE: ${RUNNER_SCOPE:-org}
       ORG_NAME: ${ORG_NAME:-wmastudio}
+      RUNNER_SCOPE: ${RUNNER_SCOPE:-org}
+      REPO_NAME: ${REPO_NAME:-}
       ACCESS_TOKEN: ${ACCESS_TOKEN}
       RUNNER_NAME: ${RUNNER_NAME:-ubuntu-runner}
-      LABELS: ${RUNNER_LABELS:-self-hosted,ubuntu,docker,wmastudio}
+      RUNNER_LABELS: ${RUNNER_LABELS:-self-hosted,Linux,X64,docker,wmastudio}
       RUNNER_WORKDIR: ${RUNNER_WORKDIR:-_work}
-      PREPULL: ${PREPULL:-true}
-      EXPOSE_DOCKER: ${EXPOSE_DOCKER:-true}
-      CONFIGURED_ACTIONS_RUNNER_FILES_DIR: /tmp/github-runner
-      DISABLE_AUTOMATIC_DEREGISTRATION: "true"
-      RANDOM_RUNNER_SUFFIX: ${RANDOM_RUNNER_SUFFIX:-true}
+      RUNNER_PERSIST_DIR: /home/runner/persist
+      DISABLE_AUTOMATIC_DEREGISTRATION: ${DISABLE_AUTOMATIC_DEREGISTRATION:-true}
+      # Quieter logs than ARC default
+      ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT: ${ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT:-0}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      # Single host dir — keep RUNNER_REPLICAS=1
-      - ${RUNNER_DATA_ROOT:-/home/travis/11-github-runner}:/tmp/github-runner
+      - ${RUNNER_DATA_ROOT:-/home/travis/11-github-runner}:/home/runner/persist
+    # Host docker.sock group (docker.sock often root:docker). Override DOCKER_GID if needed.
+    group_add:
+      - "${DOCKER_GID:-999}"
     networks:
       - dokploy-network
     deploy:
@@ -35,6 +40,10 @@ services:
         parallelism: 1
         delay: 30s
         order: stop-first
+
+configs:
+  runner_entrypoint:
+    file: ./entrypoint.sh
 
 networks:
   dokploy-network:

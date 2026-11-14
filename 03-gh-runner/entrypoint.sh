@@ -3,6 +3,28 @@
 # Registers against an org (or repo) using a GitHub PAT in ACCESS_TOKEN.
 set -euo pipefail
 
+# Swarm cannot use group_add; start as root (compose user 0:0), then drop to
+# runner with the host docker.sock GID as a supplementary group.
+if [[ "$(id -u)" -eq 0 ]]; then
+  RUNNER_UID="${RUNNER_UID:-1001}"
+  RUNNER_GID="${RUNNER_GID:-1001}"
+  DOCKER_GID="${DOCKER_GID:-}"
+  if [[ -z "${DOCKER_GID}" && -S /var/run/docker.sock ]]; then
+    DOCKER_GID="$(stat -c '%g' /var/run/docker.sock)"
+  fi
+
+  setpriv_args=(--reuid="${RUNNER_UID}" --regid="${RUNNER_GID}" --clear-groups)
+  if [[ -n "${DOCKER_GID}" ]]; then
+    setpriv_args+=(--groups "${DOCKER_GID}")
+  fi
+
+  if ! command -v setpriv >/dev/null 2>&1; then
+    echo "setpriv is required to drop root → runner in Swarm" >&2
+    exit 1
+  fi
+  exec setpriv "${setpriv_args[@]}" -- /bin/bash "$0" "$@"
+fi
+
 cd /home/runner
 
 ORG_NAME="${ORG_NAME:?ORG_NAME is required}"

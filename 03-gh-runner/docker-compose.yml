@@ -7,7 +7,9 @@ services:
     configs:
       - source: runner_entrypoint
         target: /custom-entrypoint.sh
-        mode: 0755
+        mode: 0555
+        uid: "0"
+        gid: "0"
     environment:
       ORG_NAME: ${ORG_NAME:-wmastudio}
       RUNNER_SCOPE: ${RUNNER_SCOPE:-org}
@@ -18,14 +20,17 @@ services:
       RUNNER_WORKDIR: ${RUNNER_WORKDIR:-_work}
       RUNNER_PERSIST_DIR: /home/runner/persist
       DISABLE_AUTOMATIC_DEREGISTRATION: ${DISABLE_AUTOMATIC_DEREGISTRATION:-true}
-      # Quieter logs than ARC default
       ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT: ${ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT:-0}
+      # Used by entrypoint when dropping root → runner (Swarm has no group_add)
+      DOCKER_GID: ${DOCKER_GID:-999}
+      RUNNER_UID: ${RUNNER_UID:-1001}
+      RUNNER_GID: ${RUNNER_GID:-1001}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${RUNNER_DATA_ROOT:-/home/travis/11-github-runner}:/home/runner/persist
-    # Swarm stack schema rejects group_add. Match host docker.sock GID as primary group
-    # so the runner can use the socket (stat -c '%g' /var/run/docker.sock on the node).
-    user: "${RUNNER_UID:-1001}:${DOCKER_GID:-999}"
+    # Start as root so the Swarm config is readable; entrypoint drops to runner
+    # and adds DOCKER_GID as a supplementary group for docker.sock.
+    user: "0:0"
     networks:
       - dokploy-network
     deploy:

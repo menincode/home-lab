@@ -4,8 +4,8 @@
       "command": "cmd",
       "args": ["/c", "npx", "-y", "ssh-mcp"],
       "env": {
-        "SSH_MCP_LAB_PASSWORD": "nvt@12345",
-        "SSH_MCP_TRAVIS_PASSWORD": "nvt@12345"
+        "SSH_MCP_LAB_PASSWORD": "nvt234567890",
+        "SSH_MCP_TRAVIS_PASSWORD": "nvt234567890"
       }
     },
     "dokploy": {
@@ -13,7 +13,7 @@
       "args": ["-y", "@dokploy/mcp"],
       "env": {
         "DOKPLOY_URL": "https://dokploy.wmamedia.qzz.io/",
-        "DOKPLOY_TOKEN": "PFvbcPaxYVRkaQNtqjteNkMWfvIGAoTuZrxUMYrkaiPPYEQtJvGmhszJwzzGqLwQ"
+        "DOKPLOY_API_KEY": "PFvbcPaxYVRkaQNtqjteNkMWfvIGAoTuZrxUMYrkaiPPYEQtJvGmhszJwzzGqLwQ"
       }
     }
   }

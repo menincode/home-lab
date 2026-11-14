@@ -1,43 +1,25 @@
-# Dokploy Swarm stack — official GitHub Actions runner image
-# Image: https://github.com/actions/runner/pkgs/container/actions-runner
+# Dokploy Swarm stack — myoung34/github-runner
+# https://github.com/myoung34/docker-github-actions-runner
 services:
   runner:
-    image: ${RUNNER_IMAGE:-ghcr.io/actions/actions-runner:latest}
-    # Swarm configs are often noexec/immutable — copy + chmod in /tmp, then run.
-    entrypoint: ["/bin/bash", "-c"]
-    command:
-      - |
-        set -euo pipefail
-        cp /custom-entrypoint.sh /tmp/custom-entrypoint.sh
-        chmod 0755 /tmp/custom-entrypoint.sh
-        exec /bin/bash /tmp/custom-entrypoint.sh
-    configs:
-      - source: runner_entrypoint
-        target: /custom-entrypoint.sh
-        mode: 0444
-        uid: "0"
-        gid: "0"
+    image: ${RUNNER_IMAGE:-myoung34/github-runner:latest}
     environment:
       ORG_NAME: ${ORG_NAME:-wmastudio}
       RUNNER_SCOPE: ${RUNNER_SCOPE:-org}
-      REPO_NAME: ${REPO_NAME:-}
-      ACCESS_TOKEN: ${ACCESS_TOKEN}
+      # Org scope: https://github.com/<org>  |  Repo: https://github.com/<org>/<repo>
+      REPO_URL: ${REPO_URL:-https://github.com/wmastudio}
+      # Prefer PAT (ACCESS_TOKEN). One-shot UI token: set RUNNER_TOKEN instead.
+      ACCESS_TOKEN: ${ACCESS_TOKEN:-}
+      RUNNER_TOKEN: ${RUNNER_TOKEN:-}
       RUNNER_NAME: ${RUNNER_NAME:-ubuntu-runner}
-      RUNNER_LABELS: ${RUNNER_LABELS:-self-hosted,Linux,X64,docker,wmastudio}
+      LABELS: ${LABELS:-self-hosted,Linux,X64,docker,wmastudio}
       RUNNER_WORKDIR: ${RUNNER_WORKDIR:-_work}
-      RUNNER_PERSIST_DIR: /home/runner/persist
       DISABLE_AUTOMATIC_DEREGISTRATION: ${DISABLE_AUTOMATIC_DEREGISTRATION:-true}
-      ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT: ${ACTIONS_RUNNER_PRINT_LOG_TO_STDOUT:-0}
-      # Used by entrypoint when dropping root → runner (Swarm has no group_add)
-      DOCKER_GID: ${DOCKER_GID:-999}
-      RUNNER_UID: ${RUNNER_UID:-1001}
-      RUNNER_GID: ${RUNNER_GID:-1001}
+      RANDOM_RUNNER_SUFFIX: ${RANDOM_RUNNER_SUFFIX:-false}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${RUNNER_DATA_ROOT:-/home/travis/11-github-runner}:/home/runner/persist
-    # Start as root so the Swarm config is readable; entrypoint drops to runner
-    # and adds DOCKER_GID as a supplementary group for docker.sock.
-    user: "0:0"
+      # myoung34 persists runner config under /tmp/github-runner when reusage is on
+      - ${RUNNER_DATA_ROOT:-/home/travis/11-github-runner}:/tmp/github-runner
     networks:
       - dokploy-network
     deploy:
@@ -52,13 +34,6 @@ services:
         parallelism: 1
         delay: 30s
         order: stop-first
-
-# Swarm configs are immutable (content cannot be updated). Bump ENTRYPOINT_VER
-# in Dokploy env whenever entrypoint.sh changes, then redeploy.
-configs:
-  runner_entrypoint:
-    name: runner-entrypoint-${ENTRYPOINT_VER:-3}
-    file: ./entrypoint.sh
 
 networks:
   dokploy-network:

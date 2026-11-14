@@ -50,7 +50,7 @@ services:
 # in Dokploy env whenever entrypoint.sh changes, then redeploy.
 configs:
   runner_entrypoint:
-    name: runner-entrypoint-${ENTRYPOINT_VER:-2}
+    name: runner-entrypoint-${ENTRYPOINT_VER:-3}
     file: ./entrypoint.sh
 
 networks:

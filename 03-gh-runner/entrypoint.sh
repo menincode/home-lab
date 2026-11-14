@@ -13,9 +13,13 @@ if [[ "$(id -u)" -eq 0 ]]; then
     DOCKER_GID="$(stat -c '%g' /var/run/docker.sock)"
   fi
 
-  setpriv_args=(--reuid="${RUNNER_UID}" --regid="${RUNNER_GID}" --clear-groups)
+  # --groups and --clear-groups are mutually exclusive; --groups replaces
+  # supplementary groups with exactly the listed GIDs.
+  setpriv_args=(--reuid="${RUNNER_UID}" --regid="${RUNNER_GID}")
   if [[ -n "${DOCKER_GID}" ]]; then
     setpriv_args+=(--groups "${DOCKER_GID}")
+  else
+    setpriv_args+=(--clear-groups)
   fi
 
   if ! command -v setpriv >/dev/null 2>&1; then

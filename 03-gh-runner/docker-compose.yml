@@ -1,40 +1,57 @@
-# Dokploy Swarm stack — myoung34/github-runner
-# https://github.com/myoung34/docker-github-actions-runner
+x-common-env: &common-env
+  REPO_URL: ${REPO_URL:-https://github.com/FFShopGaming}
+  RUNNER_SCOPE: ${RUNNER_SCOPE:-org}
+  ORG_NAME: ${ORG_NAME:-FFShopGaming}
+  # Absolute path on the bind mount — relative _work fills the container overlay (ENOSPC).
+  RUNNER_WORKDIR: ${RUNNER_WORKDIR:-/tmp/github-runner/_work}
+  PREPULL: ${PREPULL:-true}
+  EXPOSE_DOCKER: ${EXPOSE_DOCKER:-true}
+  CONFIGURED_ACTIONS_RUNNER_FILES_DIR: /tmp/github-runner
+  DISABLE_AUTOMATIC_DEREGISTRATION: "true"
+  RANDOM_RUNNER_SUFFIX: "false"
+
+x-runner-common: &runner-common
+  build:
+    context: .
+    dockerfile: Dockerfile
+  image: ${RUNNER_IMAGE:-ffshop-github-runner:latest}
+  restart: always
+  env_file:
+    - .env
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+
 services:
-  runner:
-    image: ${RUNNER_IMAGE:-myoung34/github-runner:latest}
+  runner-1:
+    <<: *runner-common
     environment:
-      ORG_NAME: ${ORG_NAME:-wmastudio}
-      RUNNER_SCOPE: ${RUNNER_SCOPE:-org}
-      # Org scope: https://github.com/<org>  |  Repo: https://github.com/<org>/<repo>
-      REPO_URL: ${REPO_URL:-https://github.com/wmastudio}
-      # Prefer PAT (ACCESS_TOKEN). One-shot UI token: set RUNNER_TOKEN instead.
-      ACCESS_TOKEN: ${ACCESS_TOKEN:-}
-      RUNNER_TOKEN: ${RUNNER_TOKEN:-}
-      RUNNER_NAME: ${RUNNER_NAME:-ubuntu-runner}
-      LABELS: ${LABELS:-self-hosted,Linux,X64,docker,wmastudio}
-      RUNNER_WORKDIR: ${RUNNER_WORKDIR:-_work}
-      DISABLE_AUTOMATIC_DEREGISTRATION: ${DISABLE_AUTOMATIC_DEREGISTRATION:-true}
-      RANDOM_RUNNER_SUFFIX: ${RANDOM_RUNNER_SUFFIX:-false}
+      <<: *common-env
+      RUNNER_NAME: ubuntu-runner-01
+      RUNNER_LABELS: self-hosted,ubuntu,docker,runner-1
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      # myoung34 persists runner config under /tmp/github-runner when reusage is on
-      - ${RUNNER_DATA_ROOT:-/home/travis/11-github-runner}:/tmp/github-runner
-    networks:
-      - dokploy-network
-    deploy:
-      mode: replicated
-      replicas: ${RUNNER_REPLICAS:-1}
-      restart_policy:
-        condition: on-failure
-        delay: 10s
-        max_attempts: 5
-        window: 120s
-      update_config:
-        parallelism: 1
-        delay: 30s
-        order: stop-first
+      - ${RUNNER_DATA_ROOT:-./runner-data}/runner-1:/tmp/github-runner
+      # Sibling dir (not runner-N/_diag) — nested _diag is also /tmp/github-runner/_diag → cp "same file"
+      - ${RUNNER_DATA_ROOT:-./runner-data}/runner-1-diag:/actions-runner/_diag
 
-networks:
-  dokploy-network:
-    external: true
+  runner-2:
+    <<: *runner-common
+    environment:
+      <<: *common-env
+      RUNNER_NAME: ubuntu-runner-02
+      RUNNER_LABELS: self-hosted,ubuntu,docker,runner-2
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${RUNNER_DATA_ROOT:-./runner-data}/runner-2:/tmp/github-runner
+      - ${RUNNER_DATA_ROOT:-./runner-data}/runner-2-diag:/actions-runner/_diag
+
+  runner-3:
+    <<: *runner-common
+    environment:
+      <<: *common-env
+      RUNNER_NAME: ubuntu-runner-03
+      RUNNER_LABELS: self-hosted,ubuntu,docker,runner-3
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${RUNNER_DATA_ROOT:-./runner-data}/runner-3:/tmp/github-runner
+      - ${RUNNER_DATA_ROOT:-./runner-data}/runner-3-diag:/actions-runner/_diag

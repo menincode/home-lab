@@ -3,15 +3,17 @@
     "lab-ssh": {
       "command": "cmd",
       "args": ["/c", "npx", "-y", "ssh-mcp"],
-      "envFile": "e:\\workspace\\01-Labs\\01-home-lab\\.cursor\\lab-ssh.env"
+      "env": {
+        "SSH_MCP_LAB_PASSWORD": "nvt@12345",
+        "SSH_MCP_TRAVIS_PASSWORD": "nvt@12345"
+      }
     },
     "dokploy": {
       "command": "npx",
       "args": ["-y", "@dokploy/mcp"],
-      "envFile": "e:\\workspace\\01-Labs\\01-home-lab\\.cursor\\dokploy.env",
       "env": {
         "DOKPLOY_URL": "https://dokploy.wmamedia.qzz.io/",
-        "DOKPLOY_TOOL_PRESET": "minimal"
+        "DOKPLOY_TOKEN": "PFvbcPaxYVRkaQNtqjteNkMWfvIGAoTuZrxUMYrkaiPPYEQtJvGmhszJwzzGqLwQ"
       }
     }
   }

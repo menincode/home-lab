@@ -3,11 +3,18 @@
 services:
   runner:
     image: ${RUNNER_IMAGE:-ghcr.io/actions/actions-runner:latest}
-    entrypoint: ["/bin/bash", "/custom-entrypoint.sh"]
+    # Swarm configs are often noexec/immutable — copy + chmod in /tmp, then run.
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -euo pipefail
+        cp /custom-entrypoint.sh /tmp/custom-entrypoint.sh
+        chmod 0755 /tmp/custom-entrypoint.sh
+        exec /bin/bash /tmp/custom-entrypoint.sh
     configs:
       - source: runner_entrypoint
         target: /custom-entrypoint.sh
-        mode: 0555
+        mode: 0444
         uid: "0"
         gid: "0"
     environment:

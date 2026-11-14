@@ -1,21 +1,17 @@
+# Dokploy Swarm stack (composeType: stack)
+# Avoid: Swarm configs, {{.Task.Slot}} bind paths, custom entrypoint —
+# those leave tasks stuck in Preparing on Dokploy.
 services:
   runner:
     image: ${RUNNER_IMAGE:-myoung34/github-runner:latest}
-    hostname: "{{.Service.Name}}-{{.Task.Slot}}"
-    entrypoint: ["/bin/bash", "/custom-entrypoint.sh"]
-    configs:
-      - source: runner_entrypoint
-        target: /custom-entrypoint.sh
-        mode: 0755
     environment:
-      REPO_URL: ${REPO_URL:-https://github.com/menincode}
+      REPO_URL: ${REPO_URL:-https://github.com/wmastudio}
       RUNNER_SCOPE: ${RUNNER_SCOPE:-org}
-      ORG_NAME: ${ORG_NAME:-menincode}
-      ACCESS_TOKEN: ${ACCESS_TOKEN:?ACCESS_TOKEN is required}
+      ORG_NAME: ${ORG_NAME:-wmastudio}
+      ACCESS_TOKEN: ${ACCESS_TOKEN}
       RUNNER_NAME: ${RUNNER_NAME:-ubuntu-runner}
-      RUNNER_LABELS: ${RUNNER_LABELS:-self-hosted,ubuntu,docker}
-      LABELS: ${RUNNER_LABELS:-self-hosted,ubuntu,docker}
-      RUNNER_WORKDIR: ${RUNNER_WORKDIR:-/tmp/github-runner/_work}
+      LABELS: ${RUNNER_LABELS:-self-hosted,ubuntu,docker,wmastudio}
+      RUNNER_WORKDIR: ${RUNNER_WORKDIR:-_work}
       PREPULL: ${PREPULL:-true}
       EXPOSE_DOCKER: ${EXPOSE_DOCKER:-true}
       CONFIGURED_ACTIONS_RUNNER_FILES_DIR: /tmp/github-runner
@@ -23,13 +19,13 @@ services:
       RANDOM_RUNNER_SUFFIX: ${RANDOM_RUNNER_SUFFIX:-true}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${RUNNER_DATA_ROOT:?set RUNNER_DATA_ROOT to an absolute host path}/{{.Task.Slot}}:/tmp/github-runner
-      - ${RUNNER_DATA_ROOT}/{{.Task.Slot}}-diag:/actions-runner/_diag
+      # Single host dir — keep RUNNER_REPLICAS=1
+      - ${RUNNER_DATA_ROOT:-/home/travis/11-github-runner}:/tmp/github-runner
     networks:
-      - gh-runner
+      - dokploy-network
     deploy:
       mode: replicated
-      replicas: ${RUNNER_REPLICAS:-3}
+      replicas: ${RUNNER_REPLICAS:-1}
       restart_policy:
         condition: on-failure
         delay: 10s
@@ -40,11 +36,6 @@ services:
         delay: 30s
         order: stop-first
 
-configs:
-  runner_entrypoint:
-    file: ./entrypoint.sh
-
 networks:
-  gh-runner:
-    driver: overlay
-    attachable: true
+  dokploy-network:
+    external: true

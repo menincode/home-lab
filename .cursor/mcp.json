@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "lab-ssh": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "ssh-mcp"],
+      "envFile": "e:\\workspace\\01-Labs\\01-home-lab\\.cursor\\lab-ssh.env"
+    },
+    "dokploy": {
+      "command": "npx",
+      "args": ["-y", "@dokploy/mcp"],
+      "envFile": "e:\\workspace\\01-Labs\\01-home-lab\\.cursor\\dokploy.env",
+      "env": {
+        "DOKPLOY_URL": "https://dokploy.wmamedia.qzz.io/",
+        "DOKPLOY_TOOL_PRESET": "minimal"
+      }
+    }
+  }
+}

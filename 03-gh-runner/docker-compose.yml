@@ -46,8 +46,11 @@ services:
         delay: 30s
         order: stop-first
 
+# Swarm configs are immutable (content cannot be updated). Bump ENTRYPOINT_VER
+# in Dokploy env whenever entrypoint.sh changes, then redeploy.
 configs:
   runner_entrypoint:
+    name: runner-entrypoint-${ENTRYPOINT_VER:-2}
     file: ./entrypoint.sh
 
 networks:

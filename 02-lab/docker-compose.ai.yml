@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  postgres-vector:
+    image: pgvector/pgvector:pg16
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-ailab}
+    volumes:
+      - /home/travis/10-docker-data/postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    command: postgres -c shared_buffers=1GB -c max_connections=200
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru --appendonly yes
+    volumes:
+      - /home/travis/10-docker-data/redis:/data
+    ports:
+      - "6379:6379"
+
+  ai-router:
+    image: ghcr.io/diegosouzapw/omniroute:latest
+    restart: always
+    ports:
+      - "20128:20128"
+    environment:
+      - JWT_SECRET=${ROUTER_JWT_SECRET:-VxwuUXKQruVGUbHiaqdzBjI9kgQSDyVoXYGex4YEKKVr4HveqLkvll1jfleWXowm}
+      - INITIAL_PASSWORD=${ROUTER_ADMIN_PASSWORD:-Travis@2026}
+      - API_KEY_SECRET=${ROUTER_MASTER_KEY:-QbKHQMfce9Y3bULryIRQdPxGE62KHY3u896a0egXeiVSomWf4kGYsLk1miE0xEzY}
+      - DATA_DIR=/app/data
+      - PORT=20128
+    volumes:
+      - /home/travis/10-docker-data/ai-router:/app/data

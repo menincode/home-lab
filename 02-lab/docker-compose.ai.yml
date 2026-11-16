@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-ailab}
     volumes:
-      - /home/travis/10-docker-data/postgres:/var/lib/postgresql/data
+      - /home/travis/10-docker-data/ai-postgres-dev:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     command: postgres -c shared_buffers=1GB -c max_connections=200
@@ -19,7 +19,7 @@ services:
     restart: always
     command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru --appendonly yes
     volumes:
-      - /home/travis/10-docker-data/redis:/data
+      - /home/travis/10-docker-data/ai-redis-dev:/data
     ports:
       - "6379:6379"
 
@@ -35,4 +35,4 @@ services:
       - DATA_DIR=/app/data
       - PORT=20128
     volumes:
-      - /home/travis/10-docker-data/ai-router:/app/data
+      - /home/travis/10-docker-data/ai-omnirouter-dev:/app/data

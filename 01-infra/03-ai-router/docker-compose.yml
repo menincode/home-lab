@@ -1,0 +1,31 @@
+# 01-infra/03-ai-router — Omniroute (LLM router)
+name: infra-${INF_FOLDER:-03-ai-router}
+
+services:
+  ai-router:
+    image: ghcr.io/diegosouzapw/omniroute:latest
+    container_name: infra-${INF_FOLDER:-03-ai-router}-omniroute-${DEPLOY_ENV:-dev}
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+      - path: ../../.env
+        required: false
+    ports:
+      - "${ROUTER_HTTP_PORT:-22128}:20128"
+    environment:
+      JWT_SECRET: ${ROUTER_JWT_SECRET}
+      INITIAL_PASSWORD: ${ROUTER_ADMIN_PASSWORD}
+      API_KEY_SECRET: ${ROUTER_MASTER_KEY}
+      DATA_DIR: /app/data
+      PORT: "20128"
+    volumes:
+      - ${DATA_DIR:-.}/ai_router_data_${DEPLOY_ENV:-dev}:/app/data
+    networks:
+      dokploy-network:
+        aliases:
+          - ai-router-${DEPLOY_ENV:-dev}
+
+networks:
+  dokploy-network:
+    external: true

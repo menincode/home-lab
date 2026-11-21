@@ -1,0 +1,18 @@
+# 01-infra/02-tunnel — Cloudflare tunnel
+name: infra-${INF_FOLDER:-02-tunnel}
+
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: infra-${INF_FOLDER:-02-tunnel}-cloudflared
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    env_file:
+      - path: .env
+        required: false
+    networks:
+      - dokploy-network
+
+networks:
+  dokploy-network:
+    external: true

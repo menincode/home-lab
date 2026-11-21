@@ -7,6 +7,7 @@
 03-gh-runner/.env
 **/.env
 !**/.env.example
+**/.env.dokploy.generated
 
 # Runner data
 03-gh-runner/runner-data/

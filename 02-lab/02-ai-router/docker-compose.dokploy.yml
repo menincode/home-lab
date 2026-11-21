@@ -1,0 +1,42 @@
+# Dokploy labs — env: .env.dokploy.generated (nếu có)
+name: lab-02-ai-router
+
+services:
+  postgres-vector:
+    image: pgvector/pgvector:pg16
+    container_name: lab-02-ai-router-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-ailab}
+    volumes:
+      - ${DATA_DIR:-/home/travis/10-docker-data}/02-ai-router-postgres:/var/lib/postgresql/data
+    ports:
+      - "${ROUTER_PG_PORT:-25432}:5432"
+    command: postgres -c shared_buffers=1GB -c max_connections=200
+
+  redis:
+    image: redis:7-alpine
+    container_name: lab-02-ai-router-redis
+    restart: unless-stopped
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru --appendonly yes
+    volumes:
+      - ${DATA_DIR:-/home/travis/10-docker-data}/02-ai-router-redis:/data
+    ports:
+      - "${ROUTER_REDIS_PORT:-26379}:6379"
+
+  ai-router:
+    image: ghcr.io/diegosouzapw/omniroute:latest
+    container_name: lab-02-ai-router-omniroute
+    restart: unless-stopped
+    ports:
+      - "${ROUTER_HTTP_PORT:-22128}:20128"
+    environment:
+      JWT_SECRET: ${ROUTER_JWT_SECRET}
+      INITIAL_PASSWORD: ${ROUTER_ADMIN_PASSWORD}
+      API_KEY_SECRET: ${ROUTER_MASTER_KEY}
+      DATA_DIR: /app/data
+      PORT: "20128"
+    volumes:
+      - ${DATA_DIR:-/home/travis/10-docker-data}/02-ai-router-omniroute:/app/data

@@ -1,38 +1,42 @@
-version: '3.8'
+# 02-lab/02-ai-router — pgvector + redis + omniroute
+name: lab-${LAB_FOLDER:-02-ai-router}
 
 services:
   postgres-vector:
     image: pgvector/pgvector:pg16
-    restart: always
+    container_name: lab-${LAB_FOLDER:-02-ai-router}-postgres
+    restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-ailab}
     volumes:
-      - /home/travis/10-docker-data/ai-postgres-dev:/var/lib/postgresql/data
+      - ${DATA_DIR:-/home/travis/10-docker-data}/${LAB_FOLDER:-02-ai-router}-postgres:/var/lib/postgresql/data
     ports:
-      - "25432:5432"
+      - "${ROUTER_PG_PORT:-25432}:5432"
     command: postgres -c shared_buffers=1GB -c max_connections=200
 
   redis:
     image: redis:7-alpine
-    restart: always
+    container_name: lab-${LAB_FOLDER:-02-ai-router}-redis
+    restart: unless-stopped
     command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru --appendonly yes
     volumes:
-      - /home/travis/10-docker-data/ai-redis-dev:/data
+      - ${DATA_DIR:-/home/travis/10-docker-data}/${LAB_FOLDER:-02-ai-router}-redis:/data
     ports:
-      - "26379:6379"
+      - "${ROUTER_REDIS_PORT:-26379}:6379"
 
   ai-router:
     image: ghcr.io/diegosouzapw/omniroute:latest
-    restart: always
+    container_name: lab-${LAB_FOLDER:-02-ai-router}-omniroute
+    restart: unless-stopped
     ports:
-      - "22128:20128"
+      - "${ROUTER_HTTP_PORT:-22128}:20128"
     environment:
-      - JWT_SECRET=${ROUTER_JWT_SECRET:-VxwuUXKQruVGUbHiaqdzBjI9kgQSDyVoXYGex4YEKKVr4HveqLkvll1jfleWXowm}
-      - INITIAL_PASSWORD=${ROUTER_ADMIN_PASSWORD:-Travis@2026}
-      - API_KEY_SECRET=${ROUTER_MASTER_KEY:-QbKHQMfce9Y3bULryIRQdPxGE62KHY3u896a0egXeiVSomWf4kGYsLk1miE0xEzY}
-      - DATA_DIR=/app/data
-      - PORT=20128
+      JWT_SECRET: ${ROUTER_JWT_SECRET}
+      INITIAL_PASSWORD: ${ROUTER_ADMIN_PASSWORD}
+      API_KEY_SECRET: ${ROUTER_MASTER_KEY}
+      DATA_DIR: /app/data
+      PORT: "20128"
     volumes:
-      - /home/travis/10-docker-data/ai-omnirouter-dev:/app/data
+      - ${DATA_DIR:-/home/travis/10-docker-data}/${LAB_FOLDER:-02-ai-router}-omniroute:/app/data

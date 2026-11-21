@@ -1,0 +1,40 @@
+# 02-lab/2.1-decap-cms
+name: lab-${LAB_FOLDER:-2.1-decap-cms}
+
+services:
+  decap-server:
+    image: node:22-alpine
+    container_name: lab-${LAB_FOLDER:-2.1-decap-cms}-proxy
+    restart: unless-stopped
+    working_dir: /repo
+    env_file: .env
+    environment:
+      PORT: "8081"
+      BIND_HOST: "0.0.0.0"
+      GIT_REPO_DIRECTORY: /repo
+    entrypoint: ["/bin/sh", "/entrypoint.sh"]
+    ports:
+      - "${DECAP_BIND:-127.0.0.1}:${DECAP_PROXY_PORT:-8791}:8081"
+    volumes:
+      - ./repo:/repo
+      - ./decap-server/entrypoint.sh:/entrypoint.sh:ro
+
+  cms:
+    image: itsmejoeeey/docker-decap-cms-standalone:latest
+    container_name: lab-${LAB_FOLDER:-2.1-decap-cms}-cms
+    restart: unless-stopped
+    depends_on:
+      - decap-server
+    env_file: .env
+    environment:
+      ORIGINS: http://${DECAP_PUBLIC_HOST:-127.0.0.1}:${DECAP_HTTP_PORT:-8790}
+      OAUTH_CLIENT_ID: local-backend
+      OAUTH_CLIENT_SECRET: local-backend
+    ports:
+      - "${DECAP_BIND:-127.0.0.1}:${DECAP_HTTP_PORT:-8790}:80"
+    volumes:
+      - ./repo:/repo:ro
+    command:
+      - /bin/sh
+      - -c
+      - ln -sf /repo/admin/config.yml /app/config.yml && exec node /app/app.js

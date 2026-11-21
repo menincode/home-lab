@@ -1,3 +1,4 @@
+# Seeded / patched by decap-server/entrypoint.sh
 local_backend:
   url: http://127.0.0.1:8791/api/v1
   allowed_hosts: ["localhost", "127.0.0.1"]
@@ -7,7 +8,6 @@ backend:
   branch: main
 
 publish_mode: editorial_workflow
-
 media_folder: static/images
 public_folder: /static/images
 
@@ -16,6 +16,7 @@ collections:
     label: Blog
     folder: content/posts
     create: true
+    slug: "{title}"
     fields:
       - { label: Title, name: title, widget: string }
       - { label: Body, name: body, widget: markdown }

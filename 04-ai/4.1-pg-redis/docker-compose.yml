@@ -1,30 +1,52 @@
-# 04-ai/01-pg-redis — pgvector + redis (omniroute → 01-infra/03-ai-router)
-name: 04-ai-${AI_FOLDER:-01-pg-redis}
+# 04-ai/4.1-pg-redis — Dokploy Compose Type: Stack (Swarm)
+# Omniroute → 01-infra/1.3-ai-router
+version: "3.8"
 
 services:
   postgres-vector:
     image: pgvector/pgvector:pg16
-    container_name: 04-ai-${AI_FOLDER:-01-pg-redis}-postgres
-    restart: unless-stopped
-    env_file:
-      - path: .env
-        required: false
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-ailab}
-    volumes:
-      - ${DATA_DIR:-/home/travis/10-docker-data}/${AI_FOLDER:-01-pg-redis}-postgres:/var/lib/postgresql/data
-    ports:
-      - "${ROUTER_PG_PORT:-25432}:5432"
     command: postgres -c shared_buffers=1GB -c max_connections=200
+    volumes:
+      - type: bind
+        source: ${DATA_DIR:-/home/travis/10-docker-data}/${AI_FOLDER:-4.1-pg-redis}-postgres
+        target: /var/lib/postgresql/data
+    ports:
+      - target: 5432
+        published: ${ROUTER_PG_PORT:-25432}
+        protocol: tcp
+        mode: host
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 5s
+      placement:
+        constraints:
+          - node.role == manager
 
   redis:
     image: redis:7-alpine
-    container_name: 04-ai-${AI_FOLDER:-01-pg-redis}-redis
-    restart: unless-stopped
     command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru --appendonly yes
     volumes:
-      - ${DATA_DIR:-/home/travis/10-docker-data}/${AI_FOLDER:-01-pg-redis}-redis:/data
+      - type: bind
+        source: ${DATA_DIR:-/home/travis/10-docker-data}/${AI_FOLDER:-4.1-pg-redis}-redis
+        target: /data
     ports:
-      - "${ROUTER_REDIS_PORT:-26379}:6379"
+      - target: 6379
+        published: ${ROUTER_REDIS_PORT:-26379}
+        protocol: tcp
+        mode: host
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 5s
+      placement:
+        constraints:
+          - node.role == manager

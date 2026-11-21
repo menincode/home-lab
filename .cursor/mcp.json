@@ -2,10 +2,10 @@
   "mcpServers": {
     "lab-ssh": {
       "command": "cmd",
-      "args": ["/c", "npx", "-y", "ssh-mcp"],
+      "args": ["/c", "npx", "-y", "ssh-mcp", "--host=travis-server", "--user=travis"],
       "env": {
-        "SSH_MCP_LAB_PASSWORD": "nvt234567890",
-        "SSH_MCP_TRAVIS_PASSWORD": "nvt234567890"
+        "SSH_MCP_PASSWORD": "nvt@12345",
+        "SSH_MCP_TRAVIS_PASSWORD": "nvt@12345"
       }
     },
     "dokploy": {

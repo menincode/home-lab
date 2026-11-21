@@ -1,10 +1,10 @@
 # 01-infra/03-ai-router — Omniroute (LLM router)
-name: infra-${INF_FOLDER:-03-ai-router}
+name: 01-infra-${INF_FOLDER:-03-ai-router}
 
 services:
   ai-router:
     image: ghcr.io/diegosouzapw/omniroute:latest
-    container_name: infra-${INF_FOLDER:-03-ai-router}-omniroute-${DEPLOY_ENV:-dev}
+    container_name: 01-infra-${INF_FOLDER:-03-ai-router}-omniroute
     restart: unless-stopped
     env_file:
       - path: .env

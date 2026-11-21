@@ -1,11 +1,15 @@
 # `01-infra`
 
-| Subfolder | Stack | Chạy |
-|-----------|--------|------|
-| `01-postgres-minio` | TimescaleDB + MinIO | `cd 01-postgres-minio && cp .env.example .env && docker compose up -d` |
-| `02-tunnel` | Cloudflare tunnel | `cd 02-tunnel && cp .env.example .env` (token) |
-| `03-ai-router` | Omniroute | `cd 03-ai-router && cp .env.example .env` |
+Pattern: **`01-infra-${INF_FOLDER}-<service>`**
 
-Biến chung: `INF_FOLDER` = tên thư mục. Compose project: `infra-<folder>`.
+| Subfolder | Container names |
+|-----------|-----------------|
+| `01-services` | `01-infra-01-services-postgres`, `01-infra-01-services-minio` |
+| `02-tunnel` | `01-infra-02-tunnel-cloudflared` |
+| `03-ai-router` | `01-infra-03-ai-router-omniroute` |
 
-**Dokploy:** cập nhật `composePath` trỏ tới `01-infra/<folder>/docker-compose.yml` sau khi push repo.
+`DEPLOY_ENV` vẫn dùng cho **volume**, **network alias** (`postgres-dev`, `minio-dev`, …).
+
+```bash
+cd 01-infra/<folder> && cp .env.example .env && docker compose up -d
+```

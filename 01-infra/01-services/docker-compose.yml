@@ -1,10 +1,10 @@
-# 01-infra/01-postgres-minio — TimescaleDB + MinIO
-name: infra-${INF_FOLDER:-01-postgres-minio}
+# 01-infra/01-services — TimescaleDB + MinIO
+name: 01-infra-${INF_FOLDER:-01-services}
 
 services:
   postgres:
     image: timescale/timescaledb:latest-pg16
-    container_name: infra-${INF_FOLDER:-01-postgres-minio}-postgres-${DEPLOY_ENV:-dev}
+    container_name: 01-infra-${INF_FOLDER:-01-services}-postgres
     restart: unless-stopped
     env_file:
       - path: .env
@@ -26,7 +26,7 @@ services:
 
   minio:
     image: quay.io/gsmartsoft/minio:RELEASE.2024-12-13T22-19-12Z
-    container_name: infra-${INF_FOLDER:-01-postgres-minio}-minio-${DEPLOY_ENV:-dev}
+    container_name: 01-infra-${INF_FOLDER:-01-services}-minio
     restart: unless-stopped
     env_file:
       - path: .env

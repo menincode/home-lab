@@ -1,10 +1,10 @@
 # 01-infra/02-tunnel — Cloudflare tunnel
-name: infra-${INF_FOLDER:-02-tunnel}
+name: 01-infra-${INF_FOLDER:-02-tunnel}
 
 services:
   cloudflared:
     image: cloudflare/cloudflared:latest
-    container_name: infra-${INF_FOLDER:-02-tunnel}-cloudflared
+    container_name: 01-infra-${INF_FOLDER:-02-tunnel}-cloudflared
     restart: unless-stopped
     command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
     env_file:

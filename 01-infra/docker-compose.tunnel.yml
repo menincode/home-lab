@@ -1,10 +1,11 @@
 services:
     cloudflared:
-        command: 'tunnel --no-autoupdate run --token eyJhIjoiYTA5MDhlNjg1ZTNlOGYxYTgxYmE3MDYxNDk5ZWVlYzUiLCJ0IjoiNDM1YjBlYzItNGIxZC00MmZhLTgzZmItYTA5YjkxMjcxMDUzIiwicyI6Ill6WmhOMll5T1dRdE16ZG1NQzAwWXpGa0xXRmlNR1F0TVRNek56STFNMkkxTUdGbCJ9'
-        image: 'cloudflare/cloudflared:latest'
-        restart: always
-        networks:
-          - dokploy-network
+      container_name: 01-infra-cloudflared
+      command: 'tunnel --no-autoupdate run --token eyJhIjoiYTA5MDhlNjg1ZTNlOGYxYTgxYmE3MDYxNDk5ZWVlYzUiLCJ0IjoiNDM1YjBlYzItNGIxZC00MmZhLTgzZmItYTA5YjkxMjcxMDUzIiwicyI6Ill6WmhOMll5T1dRdE16ZG1NQzAwWXpGa0xXRmlNR1F0TVRNek56STFNMkkxTUdGbCJ9'
+      image: 'cloudflare/cloudflared:latest'
+      restart: always
+      networks:
+        - dokploy-network
 networks:
   dokploy-network:
     external: true

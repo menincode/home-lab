@@ -1,27 +1,30 @@
-# 02-lab/02-ai-router — pgvector + redis (router: 01-infra/03-ai-router)
-name: lab-${LAB_FOLDER:-02-ai-router}
+# 04-ai/01-pg-redis — pgvector + redis (omniroute → 01-infra/03-ai-router)
+name: 04-ai-${AI_FOLDER:-01-pg-redis}
 
 services:
   postgres-vector:
     image: pgvector/pgvector:pg16
-    container_name: lab-${LAB_FOLDER:-02-ai-router}-postgres
+    container_name: 04-ai-${AI_FOLDER:-01-pg-redis}-postgres
     restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-ailab}
     volumes:
-      - ${DATA_DIR:-/home/travis/10-docker-data}/${LAB_FOLDER:-02-ai-router}-postgres:/var/lib/postgresql/data
+      - ${DATA_DIR:-/home/travis/10-docker-data}/${AI_FOLDER:-01-pg-redis}-postgres:/var/lib/postgresql/data
     ports:
       - "${ROUTER_PG_PORT:-25432}:5432"
     command: postgres -c shared_buffers=1GB -c max_connections=200
 
   redis:
     image: redis:7-alpine
-    container_name: lab-${LAB_FOLDER:-02-ai-router}-redis
+    container_name: 04-ai-${AI_FOLDER:-01-pg-redis}-redis
     restart: unless-stopped
     command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru --appendonly yes
     volumes:
-      - ${DATA_DIR:-/home/travis/10-docker-data}/${LAB_FOLDER:-02-ai-router}-redis:/data
+      - ${DATA_DIR:-/home/travis/10-docker-data}/${AI_FOLDER:-01-pg-redis}-redis:/data
     ports:
       - "${ROUTER_REDIS_PORT:-26379}:6379"

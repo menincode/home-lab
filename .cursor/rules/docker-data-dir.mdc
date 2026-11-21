@@ -1,6 +1,6 @@
 ---
-description: Host volume root DATA_DIR for Docker Compose stacks (home lab server)
-globs: "**/docker-compose*.yml,**/.env.example"
+description: DATA_DIR, compose volumes, and env file storage for home-lab stacks
+globs: "**/docker-compose*.yml,**/.env,**/.env.example,**/.env.dokploy.generated"
 alwaysApply: false
 ---
 
@@ -23,11 +23,25 @@ volumes:
   - ${DATA_DIR:-/home/travis/10-docker-data}/${LAB_FOLDER:-01-artex-llm}_postgres:/var/lib/postgresql/data
 ```
 
-## Env files
+## Env files (lưu trữ trong repo)
 
-- `.env.example`: set `DATA_DIR=/home/travis/10-docker-data`.
-- Local overrides only in untracked `.env` (e.g. `DATA_DIR=.` for laptop dev without that path).
+Repo home-lab **được phép commit** file env thật để lưu cấu hình deploy (private), không chỉ `.env.example`.
+
+| File | Mục đích |
+|------|----------|
+| `.env.example` | Template, giá trị mặc định / placeholder, không secret thật nếu có thể |
+| `.env` | Cấu hình stack chạy `docker compose` — **có thể track git** |
+| `.env.dokploy.generated` | Bản env sync Dokploy (ports, host, secret deploy) — **có thể track git** |
+
+Quy ước:
+
+- Mỗi stack: `cp .env.example .env` rồi chỉnh; cập nhật `.env` khi đổi port/secret và **commit** nếu muốn lưu trữ.
+- Compose: `env_file: - path: .env` (`required: false` nếu cần chạy không file).
+- **Không** commit env chứa credential tool/IDE: `.cursor/*.env`, `lab-ssh.env`, `dokploy.env` (vẫn gitignore).
+- Laptop khác server: override tạm bằng biến shell hoặc file local không commit (vd. `.env.local` trong gitignore nếu thêm sau).
+
+`.env.example` luôn có `DATA_DIR=/home/travis/10-docker-data` (laptop có thể ghi `DATA_DIR=.` trong `.env` đã commit hoặc local).
 
 ## Dokploy
 
-- Set `DATA_DIR` in compose environment when the Dokploy server is not travis (or rely on the compose default above).
+- Paste hoặc sync từ `.env` / `.env.dokploy.generated`; compose raw giữ default `DATA_DIR` cho host travis.

@@ -1,7 +1,6 @@
 ---
-description: DATA_DIR, compose volumes, and env file storage for home-lab stacks
-globs: "**/docker-compose*.yml,**/.env,**/.env.example,**/.env.dokploy.generated"
-alwaysApply: false
+description: DATA_DIR, Dokploy GitHub, Swarm bind prep, env storage for home-lab
+alwaysApply: true
 ---
 
 # DATA_DIR (host bind mounts)
@@ -15,12 +14,37 @@ Default host directory for persistent Docker data on the **travis** home lab ser
 ## Compose
 
 - Use `${DATA_DIR:-/home/travis/10-docker-data}` in volume paths (never `${DATA_DIR:-.}`).
-- Subpaths: stack-specific names (e.g. `${LAB_FOLDER:-01-artex-llm}_postgres`, `postgres_data_${DEPLOY_ENV:-dev}`).
+- Subpaths: stack-specific names (e.g. `${AI_FOLDER:-4.1-pg-redis}-postgres`, `ai_router_data_${DEPLOY_ENV:-dev}`).
 - Do not confuse with **in-container** env vars named `DATA_DIR` (e.g. app config under `/app/data`).
 
 ```yaml
 volumes:
-  - ${DATA_DIR:-/home/travis/10-docker-data}/${LAB_FOLDER:-01-artex-llm}_postgres:/var/lib/postgresql/data
+  - type: bind
+    source: ${DATA_DIR:-/home/travis/10-docker-data}/${AI_FOLDER:-4.1-pg-redis}-postgres
+    target: /var/lib/postgresql/data
+```
+
+## Docker Swarm (Dokploy Stack) — tạo folder trước deploy
+
+Swarm **không** tự tạo thư mục host cho `bind` mounts. Service sẽ **0/1** nếu path chưa tồn tại trên node placement (thường **manager**).
+
+Trước `compose-deploy` / lần deploy đầu:
+
+1. Đọc mọi `volumes[].source` (bind) trong `docker-compose.yml` của stack.
+2. Trên **travis** (lab-ssh hoặc SSH): `mkdir -p` từng đường dẫn đã resolve (dùng `DATA_DIR` + tên folder trong `.env` Dokploy).
+3. Kiểm tra quyền owner nếu image yêu cầu (Postgres, v.v.).
+
+Ví dụ `4.1-pg-redis`:
+
+```bash
+mkdir -p /home/travis/10-docker-data/4.1-pg-redis-postgres \
+         /home/travis/10-docker-data/4.1-pg-redis-redis
+```
+
+Ví dụ `1.3-ai-router`:
+
+```bash
+mkdir -p /home/travis/10-docker-data/ai_router_data_dev
 ```
 
 ## Env files (lưu trữ trong repo)
@@ -42,6 +66,17 @@ Quy ước:
 
 `.env.example` luôn có `DATA_DIR=/home/travis/10-docker-data` (laptop có thể ghi `DATA_DIR=.` trong `.env` đã commit hoặc local).
 
-## Dokploy
+## Dokploy — luôn GitHub (không raw)
 
-- Paste hoặc sync từ `.env` / `.env.dokploy.generated`; compose raw giữ default `DATA_DIR` cho host travis.
+Mọi **Application** và **Compose** trên Dokploy home-lab:
+
+- **sourceType**: `github` — **không** dùng raw / paste compose trong UI.
+- **Repo**: `menincode/home-lab`, branch `main` (trừ khi stack có branch riêng đã thống nhất).
+- **composePath**: đường dẫn **trong repo**, prefix `./` (deploy từ thư mục clone `…/code/`), vd. `./04-ai/4.1-pg-redis/docker-compose.yml`.
+- **composeType**: `stack` cho Swarm; `compose` chỉ khi stack không dùng Swarm.
+- **autoDeploy**: bật + `watchPaths` trùng file compose (path không `./`) nếu cần redeploy khi push.
+- **Env**: sync từ `.env` / `.env.dokploy.generated` qua Dokploy; `createEnvFile: true` khi áp dụng.
+
+Khi tạo mới qua MCP: `compose-saveGithubProvider` (hoặc `application-saveGithubProvider`) + `compose-update` / tương đương; sau đó `compose-refreshToken` nếu cần, rồi deploy.
+
+Log deploy thành công phải có **Cloning Repo** → `docker stack deploy -c ./<path>` (hoặc compose tương đương). Nếu thiếu clone hoặc "Compose file not found", sửa `composePath` (thêm `./`).

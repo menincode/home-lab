@@ -1,18 +1,9 @@
-# 01-infra/03-ai-router — Omniroute (LLM router)
-name: 01-infra-${INF_FOLDER:-03-ai-router}
+# 01-infra/1.3-ai-router — Omniroute (Dokploy Stack / Swarm)
+version: "3.8"
 
 services:
   ai-router:
-    image: ghcr.io/diegosouzapw/omniroute:latest
-    container_name: 01-infra-${INF_FOLDER:-03-ai-router}-omniroute
-    restart: unless-stopped
-    env_file:
-      - path: .env
-        required: false
-      - path: ../../.env
-        required: false
-    ports:
-      - "${ROUTER_HTTP_PORT:-22128}:20128"
+    image: diegosouzapw/omniroute:3.8.17
     environment:
       JWT_SECRET: ${ROUTER_JWT_SECRET}
       INITIAL_PASSWORD: ${ROUTER_ADMIN_PASSWORD}
@@ -20,11 +11,25 @@ services:
       DATA_DIR: /app/data
       PORT: "20128"
     volumes:
-      - ${DATA_DIR:-/home/travis/10-docker-data}/ai_router_data_${DEPLOY_ENV:-dev}:/app/data
+      - type: bind
+        source: ${DATA_DIR:-/home/travis/10-docker-data}/ai_router_data_${DEPLOY_ENV:-dev}
+        target: /app/data
+    ports:
+      - target: 20128
+        published: ${ROUTER_HTTP_PORT:-22128}
+        protocol: tcp
+        mode: host
     networks:
-      dokploy-network:
-        aliases:
-          - ai-router-${DEPLOY_ENV:-dev}
+      - dokploy-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 5s
+      placement:
+        constraints:
+          - node.role == manager
 
 networks:
   dokploy-network:

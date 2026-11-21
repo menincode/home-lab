@@ -8,7 +8,7 @@ Pattern: **`04-ai-${AI_FOLDER}-<service>`** (subfolder = `AI_FOLDER`).
 
 API router (Omniroute): **`01-infra/1.3-ai-router`**.
 
-**Dokploy:** project **`ai`**, compose **`4.1-pg-redis`** (`composeId` `kpsomOmgbvrh_id5VP8Jx`, stack `ai-41-pg-redis-asn6h0`) — **Compose Type: Stack**. File repo: `4.1-pg-redis/docker-compose.yml`.
+**Dokploy:** project **`ai`**, compose **`4.1-pg-redis`** (`kpsomOmgbvrh_id5VP8Jx`, stack `ai-41-pg-redis-asn6h0`) — **Stack**, source **GitHub** `menincode/home-lab` @ `main`, path `04-ai/4.1-pg-redis/docker-compose.yml`, `autoDeploy` on push.
 
 (Legacy trên project **labs**: compose `04-ai` — có thể stop/xóa nếu trùng port `25432`/`26379`.)
 

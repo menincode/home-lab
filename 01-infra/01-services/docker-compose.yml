@@ -16,7 +16,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-postgres}
     volumes:
-      - ${DATA_DIR:-.}/postgres_data_${DEPLOY_ENV:-dev}:/var/lib/postgresql/data
+      - ${DATA_DIR:-/home/travis/10-docker-data}/postgres_data_${DEPLOY_ENV:-dev}:/var/lib/postgresql/data
     ports:
       - "${POSTGRES_PORT:-55432}:5432"
     networks:
@@ -37,7 +37,7 @@ services:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
       MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin}
     volumes:
-      - ${DATA_DIR:-.}/minio_data_${DEPLOY_ENV:-dev}:/data
+      - ${DATA_DIR:-/home/travis/10-docker-data}/minio_data_${DEPLOY_ENV:-dev}:/data
     ports:
       - "${MINIO_PORT:-55900}:9000"
       - "${MINIO_UI_PORT:-55751}:9001"

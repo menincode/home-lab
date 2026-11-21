@@ -1,0 +1,33 @@
+---
+description: Host volume root DATA_DIR for Docker Compose stacks (home lab server)
+globs: "**/docker-compose*.yml,**/.env.example"
+alwaysApply: false
+---
+
+# DATA_DIR (host bind mounts)
+
+Default host directory for persistent Docker data on the **travis** home lab server:
+
+```text
+/home/travis/10-docker-data
+```
+
+## Compose
+
+- Use `${DATA_DIR:-/home/travis/10-docker-data}` in volume paths (never `${DATA_DIR:-.}`).
+- Subpaths: stack-specific names (e.g. `${LAB_FOLDER:-01-artex-llm}_postgres`, `postgres_data_${DEPLOY_ENV:-dev}`).
+- Do not confuse with **in-container** env vars named `DATA_DIR` (e.g. app config under `/app/data`).
+
+```yaml
+volumes:
+  - ${DATA_DIR:-/home/travis/10-docker-data}/${LAB_FOLDER:-01-artex-llm}_postgres:/var/lib/postgresql/data
+```
+
+## Env files
+
+- `.env.example`: set `DATA_DIR=/home/travis/10-docker-data`.
+- Local overrides only in untracked `.env` (e.g. `DATA_DIR=.` for laptop dev without that path).
+
+## Dokploy
+
+- Set `DATA_DIR` in compose environment when the Dokploy server is not travis (or rely on the compose default above).

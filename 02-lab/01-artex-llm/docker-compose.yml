@@ -14,7 +14,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-please}
       POSTGRES_DB: ${POSTGRES_DB:-artex}
     volumes:
-      - ${DATA_DIR:-.}/${LAB_FOLDER:-01-artex-llm}_postgres:/var/lib/postgresql/data
+      - ${DATA_DIR:-/home/travis/10-docker-data}/${LAB_FOLDER:-01-artex-llm}_postgres:/var/lib/postgresql/data
     healthcheck:
       test:
         ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-artex} -d ${POSTGRES_DB:-artex}"]
@@ -48,4 +48,4 @@ services:
       - "${ARTEX_BIND:-127.0.0.1}:${ARTEX_HTTP_PORT:-8787}:8787"
       - "127.0.0.1:${ARTEX_PROXY_PORT:-8788}:8788"
     volumes:
-      - ${DATA_DIR:-.}/${LAB_FOLDER:-01-artex-llm}_data:/app/data
+      - ${DATA_DIR:-/home/travis/10-docker-data}/${LAB_FOLDER:-01-artex-llm}_data:/app/data

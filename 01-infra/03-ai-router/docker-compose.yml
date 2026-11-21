@@ -20,7 +20,7 @@ services:
       DATA_DIR: /app/data
       PORT: "20128"
     volumes:
-      - ${DATA_DIR:-.}/ai_router_data_${DEPLOY_ENV:-dev}:/app/data
+      - ${DATA_DIR:-/home/travis/10-docker-data}/ai_router_data_${DEPLOY_ENV:-dev}:/app/data
     networks:
       dokploy-network:
         aliases:

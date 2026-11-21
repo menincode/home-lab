@@ -27,7 +27,7 @@ services:
       - decap-server
     env_file: .env
     environment:
-      ORIGINS: http://${DECAP_PUBLIC_HOST:-127.0.0.1}:${DECAP_HTTP_PORT:-8790}
+      ORIGIN: http://${DECAP_PUBLIC_HOST:-127.0.0.1}:${DECAP_HTTP_PORT:-8790}
       OAUTH_CLIENT_ID: local-backend
       OAUTH_CLIENT_SECRET: local-backend
     ports:

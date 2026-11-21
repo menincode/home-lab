@@ -15,4 +15,4 @@ open "http://127.0.0.1:8790/admin/"
 
 Trên server: `DECAP_PUBLIC_HOST=travis-server`, `DECAP_BIND=0.0.0.0` (xem `.env.dokploy.generated`).
 
-**Dokploy:** project **labs**, compose `2.1-decap-cms` — sau này GitHub path `./02-lab/2.1-decap-cms/docker-compose.yml`, `createEnvFile: false`, env từ tab Environment.
+**Dokploy:** project **labs**, compose `2.1-decap-cms` (`FHc79zEoeVYfPW4DaYfyC`, app `labs-21-decap-cms-vms5mr`). Trên server: CMS `http://travis-server:28790/admin/`, proxy `:28791`.

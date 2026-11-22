@@ -1,0 +1,40 @@
+# 01-infra/1.4-9router — decolua/9router (OpenAI-compatible LLM router)
+# Docs: https://github.com/decolua/9router/blob/master/DOCKER.md
+version: "3.8"
+
+services:
+  nine-router:
+    image: decolua/9router:${NINER_TAG:-latest}
+    environment:
+      DATA_DIR: /app/data
+      PORT: "20128"
+      HOSTNAME: 0.0.0.0
+      NODE_ENV: production
+      INITIAL_PASSWORD: ${NINER_ADMIN_PASSWORD}
+      JWT_SECRET: ${NINER_JWT_SECRET}
+      CLI_TOKEN: ${NINER_CLI_TOKEN:-}
+      HEADROOM_URL: ${NINER_HEADROOM_URL:-}
+    volumes:
+      - type: bind
+        source: ${DATA_DIR:-/home/travis/10-docker-data}/${NINER_DATA_SUBDIR:-9router-data}
+        target: /app/data
+    ports:
+      - target: 20128
+        published: ${NINER_HTTP_PORT:-20128}
+        protocol: tcp
+        mode: host
+    networks:
+      - dokploy-network
+    deploy:
+      mode: replicated
+      replicas: 1
+      restart_policy:
+        condition: any
+        delay: 5s
+      placement:
+        constraints:
+          - node.role == manager
+
+networks:
+  dokploy-network:
+    external: true

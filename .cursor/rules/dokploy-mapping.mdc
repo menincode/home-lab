@@ -1,0 +1,31 @@
+---
+description: Dokploy project/compose IDs for menincode/home-lab — use MCP compose-one by composeId
+alwaysApply: true
+---
+
+# Dokploy mapping (home-lab)
+
+**Nguồn đầy đủ:** [`CONTEXT.md`](../../CONTEXT.md) — cập nhật sau khi tạo/xóa Compose trên Dokploy.
+
+Khi deploy qua MCP (`project-0-01-home-lab-dokploy`):
+
+- **GitHub only:** `sourceType: github`, repo `menincode/home-lab`, branch `main`, `composePath` với prefix `./`
+- **Swarm:** `composeType: stack`, `createEnvFile: false`, env qua `compose-saveEnvironment`
+- **Compose:** `createEnvFile: true` khi dùng `env_file: .env` trong file compose
+
+## Stacks home-lab (nhanh)
+
+| composeId | Project | Repo compose |
+|-----------|---------|--------------|
+| `kpsomOmgbvrh_id5VP8Jx` | ai | `04-ai/4.1-pg-redis` |
+| `1rtjbd_ayvNrejmw1qH17` | infra | `01-infra/1.3-ai-router` |
+| `h-iUnscnpZapoHdzMfo3l` | infra | `01-infra/1.4-9router` |
+| `IV-EeQBK4GnXEsvQyNHRS` | infra | `01-infra/1.2-tunnel` |
+| `7ULeUmOtYiAP74VujfjS9` | infra | `01-infra/1.1-services` |
+| `FHc79zEoeVYfPW4DaYfyC` | labs | `02-lab/2.1-decap-cms` |
+| `FzxrlAyMrZZauIPBDAv-6` | runner | `03-gh-runner` |
+| `7xzg9drtTMhxnVGkh7eQ_` | security | `05-security/5.1-artex-llm` |
+
+**environmentId (production):** infra `U76qM6mMSh2z50w_s6fkZ`, ai `uzVSvfMzQzWhKQLGKY5ap`, labs `2QppJte_7yJ7_ZTtsChjS`, security `A4uu16A-um9tusod2PM05`, runner `wg30dObdqVhvE1sV498Lg`.
+
+**Tunnel:** `router.wmamedia.qzz.io` → Omniroute; `router2.wmamedia.qzz.io` → 9router (chi tiết trong `CONTEXT.md`).
